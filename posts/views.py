@@ -1,11 +1,11 @@
-from rest_framework import viewsets, permissions
-from posts.models import Post
-from .serializers import PostSerializer
+# posts/views.py
+from django.shortcuts import render, get_object_or_404
+from .models import Post
+from comments.models import Comment
 
-class PostViewSet(viewsets.ModelViewSet):
-    queryset = Post.objects.all().order_by('-created_at')
-    serializer_class = PostSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+def post_detail(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    comments = Comment.objects.filter(post=post)
+
+    return render(request, 'post_detail.html', {'post': post, 'comments': comments})

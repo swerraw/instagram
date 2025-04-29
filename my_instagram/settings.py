@@ -42,6 +42,11 @@ INSTALLED_APPS = [
     'api',
     'drf_yasg',
     'follows',
+    'likes',
+    'posts',
+    'comments',
+
+
 
     'users',
 ]

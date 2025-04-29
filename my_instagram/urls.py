@@ -18,8 +18,11 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('users/', include('users.urls')),  # Исправлено
+    path('users/', include('users.urls')),
     path('api/follows/', include('follows.urls')),
+    path('api/likes/', include('likes.urls')),
+    path('api/comments/', include('comments.urls')),
+
 
     # Добавление URL для Swagger
     path('swagger/', schema_view.as_view()),  # Документация Swagger
