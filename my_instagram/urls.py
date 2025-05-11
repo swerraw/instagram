@@ -1,29 +1,25 @@
 from django.contrib import admin
 from django.urls import path, include
-from drf_yasg.views import get_schema_view
-from drf_yasg import openapi
-
-# Схема документации Swagger
-schema_view = get_schema_view(
-   openapi.Info(
-      title="My Instagram API",
-      default_version='v1',
-      description="API для работы с подписками и пользователями",
-      terms_of_service="https://www.google.com/policies/terms/",
-      contact=openapi.Contact(email="contact@myinstagram.local"),
-      license=openapi.License(name="BSD License"),
-   ),
-   public=True,
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
 )
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('users/', include('users.urls')),
-    path('api/follows/', include('follows.urls')),
-    path('api/likes/', include('likes.urls')),
-    path('api/comments/', include('comments.urls')),
+    path('api/users/', include('users.urls')),  # users
+    path('api/follows/', include('follows.urls')),  # follows
+    path('api/likes/', include('likes.urls')),  # likes
+    path('api/comments/', include('comments.urls')),  # comments
+    path('api/posts/', include('posts.urls')),  # posts
+    path('api/stories/', include('stories.urls')),  # stories
 
+    # JWT token endpoints
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
-    # Добавление URL для Swagger
-    path('swagger/', schema_view.as_view()),  # Документация Swagger
+    # DRF Spectacular schema and Swagger UI
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 ]

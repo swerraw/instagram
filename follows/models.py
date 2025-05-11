@@ -15,7 +15,16 @@ class Follow(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('follower', 'following')  # не подписываться дважды
+        # Используем UniqueConstraint для явного указания уникальности
+        constraints = [
+            models.UniqueConstraint(fields=['follower', 'following'], name='unique_follow')
+        ]
 
     def __str__(self):
         return f"{self.follower} → {self.following}"
+
+    # Проверка, подписан ли пользователь на другого
+    @classmethod
+    def is_following(cls, follower, following):
+        return cls.objects.filter(follower=follower, following=following).exists()
+
