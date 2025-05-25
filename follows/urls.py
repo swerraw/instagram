@@ -1,9 +1,12 @@
-from django.urls import path
-from .views import FollowsView, UnfollowView, FollowersListView, FollowingListView
+# follows/urls.py
+
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import FollowViewSet
+
+router = DefaultRouter()
+router.register(r'follows', FollowViewSet, basename='follow')
 
 urlpatterns = [
-    path('follow/<int:user_id>/', FollowsView.as_view(), name='follow'),
-    path('unfollow/<int:user_id>/', UnfollowView.as_view(), name='unfollow'),
-    path('followers/<int:user_id>/', FollowersListView.as_view(), name='followers'),
-    path('following/<int:user_id>/', FollowingListView.as_view(), name='following'),
+    path('', include(router.urls)),
 ]

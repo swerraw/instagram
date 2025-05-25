@@ -1,30 +1,23 @@
-from django.conf import settings
+# follows/models.py
+
 from django.db import models
+from django.conf import settings
 
 class Follow(models.Model):
     follower = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        related_name='following',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='following_set'
     )
     following = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        related_name='followers',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='follower_set'
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        # Используем UniqueConstraint для явного указания уникальности
-        constraints = [
-            models.UniqueConstraint(fields=['follower', 'following'], name='unique_follow')
-        ]
+        unique_together = ('follower', 'following')  # нельзя подписаться дважды
 
     def __str__(self):
-        return f"{self.follower} → {self.following}"
-
-    # Проверка, подписан ли пользователь на другого
-    @classmethod
-    def is_following(cls, follower, following):
-        return cls.objects.filter(follower=follower, following=following).exists()
-
+        return f"{self.follower} follows {self.following}"

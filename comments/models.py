@@ -9,4 +9,4 @@ class Comment(models.Model):
     date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Comment by {self.user.username} on {self.post.title}"
+        return f"Comment by {self.user.username} on Post #{self.post.id}"

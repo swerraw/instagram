@@ -1,26 +1,19 @@
 from rest_framework import serializers
-from django.contrib.auth import get_user_model
 from .models import Follow
 
-# Сериализатор для пользователя
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = get_user_model()
-        fields = ['id', 'email', 'avatar', 'bio']
-
-# Сериализатор для Follow (Подписка)
 class FollowSerializer(serializers.ModelSerializer):
-    # Заменяем вложенные сериализаторы на представление только ID пользователя для улучшения производительности
-    follower = serializers.PrimaryKeyRelatedField(queryset=get_user_model().objects.all())
-    following = serializers.PrimaryKeyRelatedField(queryset=get_user_model().objects.all())
-
     class Meta:
         model = Follow
-        fields = ['id', 'follower', 'following', 'created_at']
+        fields = ['id', 'follower', 'following']
+        read_only_fields = ['follower']
 
-    # Дополнительный метод, если вы хотите вернуть информацию о пользователе (например, в виде словаря)
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation['follower'] = UserSerializer(instance.follower).data
-        representation['following'] = UserSerializer(instance.following).data
-        return representation
+    def validate(self, data):
+        follower = self.context['request'].user
+        following = data['following']
+        if Follow.objects.filter(follower=follower, following=following).exists():
+            raise serializers.ValidationError(
+                f"Вы уже подписаны на пользователя {following.username}."
+            )
+        if follower == following:
+            raise serializers.ValidationError("Вы не можете подписаться на самого себя.")
+        return data

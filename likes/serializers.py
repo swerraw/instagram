@@ -7,7 +7,11 @@ class LikeSerializer(serializers.ModelSerializer):
         fields = ('id', 'user', 'post', 'comment', 'created_at')
 
     def validate(self, data):
-        # Проверка, чтобы не лайкать одновременно пост и комментарий
-        if data.get('post') and data.get('comment'):
+        post = data.get('post')
+        comment = data.get('comment')
+
+        if post and comment:
             raise serializers.ValidationError("Можно лайкать только пост или комментарий, но не оба одновременно.")
+        if not post and not comment:
+            raise serializers.ValidationError("Необходимо указать либо пост, либо комментарий для лайка.")
         return data

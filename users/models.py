@@ -3,45 +3,42 @@ from django.db import models
 from django.conf import settings
 
 
-
 class CustomUserManager(UserManager):
-    def create_superuser(self, email=None, password=None, **extra_fields):
-        """
-        Создаёт суперпользователя с email и паролем.
-        Если email не передан, то используем пустое значение.
-        """
-        if not email:
-            email = ''  # Можно оставить пустым, если не передан email
+    def create_user(self, name, email=None, password=None, **extra_fields):
+        if not name:
+            raise ValueError('Поле name должно быть указано')
         email = self.normalize_email(email)
-
-        if not extra_fields.get('name'):
-            raise ValueError('The Name field must be set')  # Обязательное поле name
-
-        user = self.model(email=email, **extra_fields)
+        user = self.model(name=name, email=email, **extra_fields)
         user.set_password(password)
-        user.is_staff = True
-        user.is_superuser = True
         user.save(using=self._db)
         return user
 
+    def create_superuser(self, name, email=None, password=None, **extra_fields):
+        if not name:
+            raise ValueError('Поле name обязательно для суперпользователя')
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        return self.create_user(name=name, email=email, password=password, **extra_fields)
+
 
 class CustomUser(AbstractUser):
-    username = None  # отключаем поле username
+    username = None  # отключаем стандартное поле username
     email = models.EmailField(blank=True, null=True)
 
-    name = models.CharField(max_length=255, unique=True,  blank=False, null=False)  # добавлено поле name
+    name = models.CharField(max_length=255, unique=True, blank=False, null=False)  # новое уникальное имя
     phone = models.CharField(max_length=20, unique=True, null=True, blank=True)
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
     bio = models.TextField(null=True, blank=True)
     links = models.TextField(null=True, blank=True)
 
-    USERNAME_FIELD = 'name'
-    REQUIRED_FIELDS = []  # теперь name обязательно при создании пользователя
+    USERNAME_FIELD = 'name'  # используем name как уникальный идентификатор
+    REQUIRED_FIELDS = []  # другие поля не обязательны
 
-    objects = CustomUserManager()  # Используем свой менеджер
+    objects = CustomUserManager()  # подключаем наш кастомный менеджер
 
     def __str__(self):
         return self.email or self.name or "User"
+
 
 class UserSettings(models.Model):
     user = models.OneToOneField(
@@ -57,3 +54,4 @@ class UserSettings(models.Model):
 
     def __str__(self):
         return f"Настройки пользователя: {self.user.name}"
+

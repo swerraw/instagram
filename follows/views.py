@@ -1,19 +1,13 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
+from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
-from django.contrib.auth import get_user_model
-from .models import Follows
+from .models import Follow
+from .serializers import FollowSerializer
 
-class UnfollowView(APIView):
-    permission_classes = [IsAuthenticated]
+class FollowViewSet(viewsets.ModelViewSet):
+    queryset = Follow.objects.all()
+    serializer_class = FollowSerializer
+    permission_classes = [IsAuthenticated]  # чтобы только залогиненные могли подписываться
 
-    def post(self, request, user_id):
-        try:
-            to_unfollow = get_user_model().objects.get(id=user_id)
-            follow_instance = Follows.objects.get(follower=request.user, following=to_unfollow)
-            follow_instance.delete()
-            return Response({"detail": f"Вы отписались от {to_unfollow.email}"}, status=200)
-        except get_user_model().DoesNotExist:
-            return Response({"detail": "Пользователь не найден."}, status=404)
-        except Follows.DoesNotExist:
-            return Response({"detail": "Вы не подписаны на этого пользователя."}, status=400)
+    def perform_create(self, serializer):
+        # сохраняем подписку, указывая, кто подписывается — текущий пользователь
+        serializer.save(follower=self.request.user)
