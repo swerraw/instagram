@@ -1,7 +1,8 @@
+from drf_spectacular.utils import extend_schema
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 from .models import Like
 from posts.models import Post
 from comments.models import Comment
@@ -10,6 +11,12 @@ from .serializers import LikeSerializer
 class LikePostAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        request=LikeSerializer,
+        responses={201: LikeSerializer},
+        tags=["Лайки"],
+        summary="Поставить лайк на пост или комментарий"
+    )
     def post(self, request, *args, **kwargs):
         post_id = request.data.get('post')
         comment_id = request.data.get('comment')
@@ -38,6 +45,12 @@ class LikePostAPIView(APIView):
 
         return Response(LikeSerializer(like).data, status=status.HTTP_201_CREATED)
 
+    @extend_schema(
+        request=LikeSerializer,
+        responses={204: None},
+        tags=["Лайки"],
+        summary="Удалить лайк с поста или комментария"
+    )
     def delete(self, request, *args, **kwargs):
         post_id = request.data.get('post')
         comment_id = request.data.get('comment')
