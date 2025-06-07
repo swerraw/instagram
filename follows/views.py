@@ -10,12 +10,12 @@ class FollowViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        # Возвращаем только подписки текущего пользователя
-        return self.queryset.filter(user=self.request.user)
+        # Показываем подписки, где текущий пользователь — подписчик
+        return self.queryset.filter(follower=self.request.user)
 
     def perform_create(self, serializer):
-        # При создании подписки привязываем её к текущему пользователю
-        serializer.save(user=self.request.user)
+        # При создании подписки указываем текущего пользователя как подписчика
+        serializer.save(follower=self.request.user)
 
     @extend_schema(
         tags=["Подписки"],

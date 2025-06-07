@@ -1,14 +1,13 @@
 from django.db import models
 from django.contrib.auth import get_user_model
-from posts.models import Post
-from comments.models import Comment
 
 User = get_user_model()
 
 class Like(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='likes', blank=True, null=True)
-    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='likes', blank=True, null=True)
+    # Используем строковые ссылки вместо прямого импорта моделей
+    post = models.ForeignKey('posts.Post', on_delete=models.CASCADE, related_name='likes', blank=True, null=True)
+    comment = models.ForeignKey('comments.Comment', on_delete=models.CASCADE, related_name='likes', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -21,9 +20,10 @@ class Like(models.Model):
         ]
 
     def __str__(self):
+        user_name = getattr(self.user, 'name', str(self.user))
         if self.post:
-            return f"{self.user.name} лайкнул пост {self.post.id}"
+            return f"{user_name} лайкнул пост {self.post.id}"
         elif self.comment:
-            return f"{self.user.name} лайкнул комментарий {self.comment.id}"
+            return f"{user_name} лайкнул комментарий {self.comment.id}"
         else:
-            return f"{self.user.name} поставил лайк"
+            return f"{user_name} поставил лайк"

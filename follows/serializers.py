@@ -2,6 +2,8 @@ from rest_framework import serializers
 from .models import Follow
 
 class FollowSerializer(serializers.ModelSerializer):
+    follower = serializers.StringRelatedField(read_only=True)  # Показываем имя подписчика, но не редактируем его
+
     class Meta:
         model = Follow
         fields = ['id', 'follower', 'following']

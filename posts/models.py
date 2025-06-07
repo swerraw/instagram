@@ -1,12 +1,17 @@
 from django.db import models
-from django.conf import settings
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 class Post(models.Model):
-    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='posts/images/', blank=True, null=True)
-    video = models.FileField(upload_to='posts/videos/', blank=True, null=True)  # ← Добавили это
-    caption = models.TextField(blank=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
+    caption = models.CharField(max_length=255, blank=True)
+    content = models.TextField(null=True, blank=True)
+    image = models.ImageField(upload_to='post_images/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        ordering = ['-created_at']
+
     def __str__(self):
-        return f"Post by {self.author.username} on {self.created_at}"
+        return f"Пост {self.id} от {self.author.username}"
